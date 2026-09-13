@@ -1,0 +1,5 @@
+{
+  "metamodule": false,
+  "summary": "通过 WebUI 管理 Android Wi-Fi 热点，并在 ADB USB 与 Wi-Fi 调试模式之间切换。",
+  "sourceUrl": "https://github.com/KernelSU-Modules-Repo/auto_adb_wifi"
+}
