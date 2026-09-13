@@ -41,7 +41,7 @@
       font-size:13px; font-weight:700; letter-spacing:.4px;
     }
     .status-grid {
-      display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px 14px;
+      display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:0 14px 14px;
     }
     .status-item { min-width:0; padding:14px; background:var(--soft); border-radius:14px; }
     .status-label { display:block; margin-bottom:8px; color:var(--muted); font-size:12px; }
@@ -96,6 +96,7 @@
     footer a {
       color:var(--primary); text-decoration:none; font-weight:600;
     }
+    @media (max-width:500px) { .status-grid { grid-template-columns:1fr 1fr; } }
     @media (max-width:380px) { .status-grid { grid-template-columns:1fr; } }
   </style>
 </head>
@@ -113,8 +114,16 @@
           <span id="hotspotStatus" class="status-value"><span class="dot"></span><span>读取中…</span></span>
         </div>
         <div class="status-item">
-          <span class="status-label">ADB 连接模式</span>
-          <span id="adbStatus" class="status-value"><span class="dot"></span><span>读取中…</span></span>
+          <span class="status-label">ADB 是否开启</span>
+          <span id="adbEnabledStatus" class="status-value"><span class="dot"></span><span>读取中…</span></span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">USB 模式</span>
+          <span id="adbUsbStatus" class="status-value"><span class="dot"></span><span>读取中…</span></span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Wi-Fi 模式</span>
+          <span id="adbWifiStatus" class="status-value"><span class="dot"></span><span>读取中…</span></span>
         </div>
       </div>
     </section>
@@ -174,7 +183,7 @@
     </section>
 
     <footer>
-      <a href="https://github.com/honue/AutoADBWiFi">github.com/honue/AutoADBWiFi</a>
+      <a href="https://github.com/KernelSU-Modules-Repo/auto_adb_wifi">github.com/KernelSU-Modules-Repo/auto_adb_wifi</a>
       <div>Designed by honue</div>
     </footer>
   </main>
@@ -184,7 +193,9 @@
 
     const moduleDir = '/data/adb/modules/auto_adb_wifi';
     const controls = [...document.querySelectorAll('input')];
-    const adbStatus = document.getElementById('adbStatus');
+    const adbEnabledStatus = document.getElementById('adbEnabledStatus');
+    const adbUsbStatus = document.getElementById('adbUsbStatus');
+    const adbWifiStatus = document.getElementById('adbWifiStatus');
     const hotspotStatus = document.getElementById('hotspotStatus');
 
     // Execute root module scripts through the KernelSU WebUI bridge.
@@ -210,21 +221,21 @@
         execRoot('/system/bin/sh ' + moduleDir + '/hotspot.sh status')
       ]);
 
-      const adbEnabled = adbText.includes('当前 ADB：已开启');
+      const adbEnabled = adbText.includes('ADB 是否开启：已开启');
+      const adbWifi = adbText.includes('当前 ADB 模式：Wi-Fi');
       const adbBootEnabled = adbText.includes('开机自动开启：已开启');
       const hotspotEnabled = hotspotText.includes('当前热点：已开启');
       const hotspotBootEnabled = hotspotText.includes('开机自动开启热点：已开启');
 
-      document.getElementById('adbWifiMode').checked = adbEnabled;
-      document.getElementById('adbUsbMode').checked = !adbEnabled;
+      document.getElementById('adbWifiMode').checked = adbWifi;
+      document.getElementById('adbUsbMode').checked = !adbWifi;
       document.getElementById('bootToggle').checked = adbBootEnabled;
       document.getElementById('hotspotToggle').checked = hotspotEnabled;
       document.getElementById('hotspotBootToggle').checked = hotspotBootEnabled;
 
-      adbStatus.className = 'status-value is-mode';
-      adbStatus.innerHTML = '<span class="dot"></span><span>' +
-        (adbEnabled ? 'Wi‑Fi 模式' : 'USB 模式') +
-        '</span>';
+      renderStatus(adbEnabledStatus, adbEnabled);
+      renderStatus(adbUsbStatus, !adbWifi, adbWifi ? '（未使用）' : '（当前）');
+      renderStatus(adbWifiStatus, adbWifi, adbWifi ? '（当前）' : '（未使用）');
       renderStatus(hotspotStatus, hotspotEnabled);
     }
 

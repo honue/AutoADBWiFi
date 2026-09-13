@@ -42,11 +42,17 @@ case "$1" in
   status)
     [ "$(cat "$BOOT_FILE" 2>/dev/null)" = "1" ] && echo "开机自动开启：已开启" || echo "开机自动开启：已关闭"
     PORT=$(getprop service.adb.tcp.port)
-    if [ "$PORT" = "5555" ] && [ "$(getprop init.svc.adbd)" = "running" ]; then
-      echo "当前 ADB：已开启 端口：$PORT"
+    if [ "$(getprop init.svc.adbd)" = "running" ]; then
+      echo "ADB 是否开启：已开启"
     else
-      echo "当前 ADB：已关闭 端口：$PORT"
+      echo "ADB 是否开启：已关闭"
     fi
+    if [ "$PORT" = "5555" ]; then
+      echo "当前 ADB 模式：Wi-Fi"
+    else
+      echo "当前 ADB 模式：USB"
+    fi
+    echo "当前 ADB 端口：$PORT"
     ;;
   *) echo "用法：adb.sh {on|off|boot-on|boot-off|status}"; exit 1 ;;
 esac
